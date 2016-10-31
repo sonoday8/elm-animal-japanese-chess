@@ -1,0 +1,6 @@
+.DS_Store
+.idea
+.sass-cache
+elm-stuff
+css/main.css
+js/main.js
