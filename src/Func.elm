@@ -28,22 +28,26 @@ updatedPieces pieces dragPos dropPos=
 
       _ -> pieces
 
+yLow = 2
+yHeg = 5
+xLow = 0
+xHeg = 3
+
 -- ドロップできる位置リストを取得
 getDropFields : Piece -> List Position
 getDropFields piece =
   let
     {x,y} = piece.pos
     p_type = piece.p_type
-    forward x y = if (y-1 >= 0) then [{x=x, y=(y-1)}] else []
-    back x y = if (y+1 <= 3) then [{x=x, y=(y+1)}] else []
-    left x y = if (x-1 >= 0) then [{x=(x-1), y=y}] else []
-    right x y = if (x+1 <= 2) then [{x=(x+1), y=y}] else []
-    diagFL x y = if (x-1 >= 0 && y-1 >= 0) then [{x=(x-1), y=(y-1)}] else []
-    diagFR x y = if (x+1 <= 2 && y-1 >= 0) then [{x=(x+1), y=(y-1)}] else []
-    diagBL x y = if (x-1 >= 0 && y+1 <= 3) then [{x=(x-1), y=(y+1)}] else []
-    diagBR x y = if (x+1 <= 3 && y+1 <= 3) then [{x=(x+1), y=(y+1)}] else []
+    forward x y = if (y-1 >= yLow) then [{x=x, y=(y-1)}] else []
+    back x y = if (y+1 <= yHeg) then [{x=x, y=(y+1)}] else []
+    left x y = if (x-1 >= xLow) then [{x=(x-1), y=y}] else []
+    right x y = if (x+1 <= xHeg) then [{x=(x+1), y=y}] else []
+    diagFL x y = if (x-1 >= xLow && y-1 >= yLow) then [{x=(x-1), y=(y-1)}] else []
+    diagFR x y = if (x+1 <= xHeg && y-1 >= yLow) then [{x=(x+1), y=(y-1)}] else []
+    diagBL x y = if (x-1 >= xLow && y+1 <= yHeg) then [{x=(x-1), y=(y+1)}] else []
+    diagBR x y = if (x+1 <= xHeg && y+1 <= yHeg) then [{x=(x+1), y=(y+1)}] else []
   in
-  -- yが縦(max,3)、xが横(max,2)
   case p_type of
     LION ->
       forward x y ++ back x y ++ left x y ++ right x y ++ diagFL x y ++ diagFR x y ++ diagBL x y ++ diagBR x y ++ []

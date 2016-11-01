@@ -20,7 +20,9 @@ type alias Model = {
   turn:Bool,
   drag: Maybe Position,
   isDropFields: List Position,
-  pieces:List Piece
+  pieces:List Piece,
+  myPieces: List Piece,
+  enemyPieces: List Piece
   }
 
 model : Model
@@ -30,15 +32,17 @@ model =
     drag=Nothing,
     isDropFields=[],
     pieces= [
-         {own=ENEMY,p_type=ELEP,isDrag=False,pos={x=2,y=0}}
-        ,{own=ENEMY,p_type=LION,isDrag=False,pos={x=1,y=0}}
-        ,{own=ENEMY,p_type=GIRA,isDrag=False,pos={x=0,y=0}}
-        ,{own=ENEMY,p_type=CHICK,isDrag=False,pos={x=1,y=1}}
-        ,{own=MY,p_type=CHICK,isDrag=False,pos={x=1,y=2}}
-        ,{own=MY,p_type=GIRA,isDrag=False,pos={x=2,y=3}}
-        ,{own=MY,p_type=LION,isDrag=False,pos={x=1,y=3}}
-        ,{own=MY,p_type=ELEP,isDrag=False,pos={x=0,y=3}}
-    ]
+         {own=ENEMY,p_type=ELEP,isDrag=False,pos={x=2,y=2}}
+        ,{own=ENEMY,p_type=LION,isDrag=False,pos={x=1,y=2}}
+        ,{own=ENEMY,p_type=GIRA,isDrag=False,pos={x=0,y=2}}
+        ,{own=ENEMY,p_type=CHICK,isDrag=False,pos={x=1,y=3}}
+        ,{own=MY,p_type=CHICK,isDrag=False,pos={x=1,y=4}}
+        ,{own=MY,p_type=GIRA,isDrag=False,pos={x=2,y=5}}
+        ,{own=MY,p_type=LION,isDrag=False,pos={x=1,y=5}}
+        ,{own=MY,p_type=ELEP,isDrag=False,pos={x=0,y=5}}
+    ],
+    myPieces=[],
+    enemyPieces=[]
     }
 
 type Msg
@@ -92,7 +96,7 @@ update msg model =
 
     _ -> model
 
-rowLength = 4
+rowLength = 8
 colLength = 3
 
 fields : List Position
@@ -127,7 +131,9 @@ viewFiels model =
 
         divAttributes =
             if isDorp then
-                [ style [("flex-grow", "1"),("width", "30%"), ("height", "25%")], onDrop (Drop pos),dragOverPrevent NoOp]
+                [ style
+                  [("flex-grow", "1"),("width", "30%"), ("height", "25%")]
+                , onDrop (Drop pos),dragOverPrevent NoOp]
             else
                 [ style [("flex-grow", "1"),("width", "30%"), ("height", "25%")]]
       in
