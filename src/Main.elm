@@ -17,32 +17,28 @@ main =
     }
 
 type alias Model = {
-  turn:Bool,
-  drag: Maybe Position,
-  isDropFields: List Position,
-  pieces:List Piece,
-  myPieces: List Piece,
-  enemyPieces: List Piece
+  turn:Bool
+  , drag: Maybe Position
+  , isDropFields: List Position
+  , pieces:List Piece
   }
 
 model : Model
 model =
     {
-    turn=True,
-    drag=Nothing,
-    isDropFields=[],
-    pieces= [
-         {own=ENEMY,p_type=ELEP,isDrag=False,pos={x=2,y=2}}
-        ,{own=ENEMY,p_type=LION,isDrag=False,pos={x=1,y=2}}
-        ,{own=ENEMY,p_type=GIRA,isDrag=False,pos={x=0,y=2}}
-        ,{own=ENEMY,p_type=CHICK,isDrag=False,pos={x=1,y=3}}
-        ,{own=MY,p_type=CHICK,isDrag=False,pos={x=1,y=4}}
-        ,{own=MY,p_type=GIRA,isDrag=False,pos={x=2,y=5}}
-        ,{own=MY,p_type=LION,isDrag=False,pos={x=1,y=5}}
-        ,{own=MY,p_type=ELEP,isDrag=False,pos={x=0,y=5}}
-    ],
-    myPieces=[],
-    enemyPieces=[]
+    turn=True
+    , drag=Nothing
+    , isDropFields=[]
+    , pieces= [
+         {own=ENEMY,p_type=ELEP,pos={x=2,y=2}}
+        ,{own=ENEMY,p_type=LION,pos={x=1,y=2}}
+        ,{own=ENEMY,p_type=GIRA,pos={x=0,y=2}}
+        ,{own=ENEMY,p_type=CHICK,pos={x=1,y=3}}
+        ,{own=MY,p_type=CHICK,pos={x=1,y=4}}
+        ,{own=MY,p_type=GIRA,pos={x=2,y=5}}
+        ,{own=MY,p_type=LION,pos={x=1,y=5}}
+        ,{own=MY,p_type=ELEP,pos={x=0,y=5}}
+    ]
     }
 
 type Msg
@@ -60,7 +56,7 @@ update msg model =
           dragPieces = List.filter (\piece -> piece.pos == pos) model.pieces
           dropFields =
             case (List.head dragPieces) of
-              Just dragPiece -> getDropFields dragPiece
+              Just dragPiece -> getDropFields dragPiece model.pieces
               _ -> []
         in
           { model
@@ -88,24 +84,12 @@ update msg model =
         pieces = updatedPieces model.pieces dragPos dropPos
       in
         { model
-        |
-        drag=Nothing,
-        isDropFields=[],
-        pieces=pieces
+        | drag=Nothing
+        , isDropFields=[]
+        , pieces=pieces
         }
 
     _ -> model
-
-rowLength = 8
-colLength = 3
-
-fields : List Position
-fields =
-  Array.initialize (rowLength*colLength) (\i ->
-    { x = i % colLength
-    , y = i // colLength
-    }
-  ) |> Array.toList
 
 viewFiels model =
   List.map (\pos ->
