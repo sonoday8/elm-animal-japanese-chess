@@ -20,6 +20,19 @@ updatedPieces : List Piece -> Maybe Position -> Position -> List Piece
 updatedPieces pieces dragPos dropPos=
   case dragPos of
       Just drag ->
+        let
+          _ = Debug.log "" (getEmptyReservePos True pieces)
+          reservPos = getEmptyReservePos True pieces
+          pieces = case (getEmptyReservePos True pieces) of
+            Just resPos ->
+              List.map (\piece ->
+                             if piece.pos == dropPos then
+                               {piece | pos=resPos}
+                             else
+                               piece
+                             ) pieces
+            Nothing -> pieces
+        in
         List.map (\piece ->
           if piece.pos == drag then
             {piece | pos=dropPos}
@@ -46,6 +59,32 @@ fields =
     , y = i // colLength
     }
   ) |> Array.toList
+
+-- 敵持ち駒フィールド
+enemyReserveFields : List Position
+enemyReserveFields = Array.initialize (yLow*colLength) (\i ->
+    { x = i % colLength
+    , y = i // colLength
+    }) |> Array.toList
+
+-- 自分持ち駒フィールド
+myReserveFields : List Position
+myReserveFields = Array.initialize (yLow*colLength) (\i ->
+    { x = i % colLength
+    , y = (i // colLength) + (yHeg + 1)
+    }) |> Array.toList
+
+-- 持ち駒フィールドの空いているポジション取得
+getEmptyReservePos : Bool -> List Piece -> Maybe Position
+getEmptyReservePos myTurn pieces =
+  let
+    isFieldEmpty pos pieces = List.isEmpty (List.filter (\piece -> piece.pos == pos) pieces)
+    emptyReservePos reserveFields = List.filter (\pos -> isFieldEmpty pos pieces) reserveFields
+  in
+  if(myTurn) then
+    (List.head (emptyReservePos myReserveFields))
+  else
+    (List.head (emptyReservePos enemyReserveFields))
 
 
 -- フィールドの空いている位置リストを取得
