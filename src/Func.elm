@@ -8,20 +8,13 @@ import Json.Decode as Json
 
 import Types exposing(..)
 
-
---dropFields pieces drapPos =
---  let dragPieces = List.filter (\piece -> piece.pos == drapPos) pieces in
---  case (List.head dragPieces) of
---    Just dragPiece -> getDropFields dragPiece
---    _ -> []
-
 --ドロップした際、駒の位置を更新
 updatedPieces : List Piece -> Maybe Position -> Position -> List Piece
 updatedPieces pieces dragPos dropPos=
   case dragPos of
       Just drag ->
         let
-          _ = Debug.log "" (getEmptyReservePos True pieces)
+          _ = Debug.log "" (getEmptyReservePos False pieces)
           reservPos = getEmptyReservePos True pieces
           pieces = case (getEmptyReservePos True pieces) of
             Just resPos ->
@@ -97,9 +90,11 @@ getEmptyFields pieces fields =
 
 
 -- ドロップできる位置リストを取得
-getDropFields : Piece -> List Piece -> List Position
-getDropFields piece pieces =
+getDropFields : Piece -> Model -> List Position
+getDropFields piece model =
   let
+    _ = Debug.log "d:" piece.pos
+    pieces = model.pieces
     {x,y} = piece.pos
     p_type = piece.p_type
     isReserve = (y < 2 || y > 5 )
@@ -123,9 +118,11 @@ getDropFields piece pieces =
     GIRA ->
       forward x y ++ back x y ++ left x y ++ right x y ++ []
     CHICK ->
-      forward x y ++ []
+      if (model.turn) then forward x y ++ []
+      else back x y ++ []
     CHICKEN ->
-      forward x y ++ back x y ++ left x y ++ right x y ++ diagFL x y ++ diagFR x y ++ []
+      if (model.turn) then forward x y ++ back x y ++ left x y ++ right x y ++ diagFL x y ++ diagFR x y ++ []
+      else forward x y ++ back x y ++ left x y ++ right x y ++ diagBL x y ++ diagBR x y ++ []
     _ -> []
 
 onDrop : msg -> Attribute msg

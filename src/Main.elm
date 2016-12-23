@@ -16,13 +16,6 @@ main =
     , update = update
     }
 
-type alias Model = {
-  turn:Bool
-  , drag: Maybe Position
-  , isDropFields: List Position
-  , pieces:List Piece
-  }
-
 model : Model
 model =
     {
@@ -56,7 +49,7 @@ update msg model =
           dragPieces = List.filter (\piece -> piece.pos == pos) model.pieces
           dropFields =
             case (List.head dragPieces) of
-              Just dragPiece -> getDropFields dragPiece model.pieces
+              Just dragPiece -> getDropFields dragPiece model
               _ -> []
         in
           { model
@@ -84,7 +77,8 @@ update msg model =
         pieces = updatedPieces model.pieces dragPos dropPos
       in
         { model
-        | drag=Nothing
+        | turn=not model.turn
+        , drag=Nothing
         , isDropFields=[]
         , pieces=pieces
         }
