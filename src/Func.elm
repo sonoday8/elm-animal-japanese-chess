@@ -9,18 +9,18 @@ import Json.Decode as Json
 import Types exposing(..)
 
 --ドロップした際、駒の位置を更新
-updatedPieces : List Piece -> Maybe Position -> Position -> List Piece
-updatedPieces pieces dragPos dropPos=
+updatedPieces : Bool -> List Piece -> Maybe Position -> Position -> List Piece
+updatedPieces turn pieces dragPos dropPos=
   case dragPos of
       Just drag ->
         let
-          _ = Debug.log "" (getEmptyReservePos False pieces)
-          reservPos = getEmptyReservePos True pieces
-          pieces = case (getEmptyReservePos True pieces) of
+          owner = if turn then MY else ENEMY
+          reservPos = getEmptyReservePos turn pieces
+          pieces = case (getEmptyReservePos turn pieces) of
             Just resPos ->
               List.map (\piece ->
-                             if piece.pos == dropPos then
-                               {piece | pos=resPos}
+                             if (piece.pos == dropPos && not (piece.own == owner)) then
+                               {piece | pos=resPos, own=owner}
                              else
                                piece
                              ) pieces
@@ -94,6 +94,7 @@ getDropFields : Piece -> Model -> List Position
 getDropFields piece model =
   let
     _ = Debug.log "d:" piece.pos
+    _ = Debug.log "d:" piece.own
     pieces = model.pieces
     {x,y} = piece.pos
     p_type = piece.p_type
@@ -106,23 +107,38 @@ getDropFields piece model =
     diagFR x y = if (x+1 <= xHeg && y-1 >= yLow) then [{x=(x+1), y=(y-1)}] else []
     diagBL x y = if (x-1 >= xLow && y+1 <= yHeg) then [{x=(x-1), y=(y+1)}] else []
     diagBR x y = if (x+1 <= xHeg && y+1 <= yHeg) then [{x=(x+1), y=(y+1)}] else []
+    owner = if model.turn then MY else ENEMY
   in
-  if isReserve then
+  if (not ( (piece.own == MY && model.turn) || (piece.own == ENEMY && not model.turn) )) then
+    []
+  else if isReserve then
     getEmptyFields pieces fields
   else
+    let myPiecePoses = List.map (\piece -> piece.pos) (List.filter (\piece -> piece.own == owner) pieces) in
     case p_type of
     LION ->
-      forward x y ++ back x y ++ left x y ++ right x y ++ diagFL x y ++ diagFR x y ++ diagBL x y ++ diagBR x y ++ []
+      let movePoses = forward x y ++ back x y ++ left x y ++ right x y ++ diagFL x y ++ diagFR x y ++ diagBL x y ++ diagBR x y ++ [] in
+      List.filter (\pos -> not (List.member pos myPiecePoses)) movePoses
     ELEP ->
-      diagFL x y ++ diagFR x y ++ diagBL x y ++ diagBR x y ++ []
+      let movePoses = diagFL x y ++ diagFR x y ++ diagBL x y ++ diagBR x y ++ [] in
+      List.filter (\pos -> not (List.member pos myPiecePoses)) movePoses
     GIRA ->
-      forward x y ++ back x y ++ left x y ++ right x y ++ []
+      let movePoses = forward x y ++ back x y ++ left x y ++ right x y ++ [] in
+      List.filter (\pos -> not (List.member pos myPiecePoses)) movePoses
     CHICK ->
-      if (model.turn) then forward x y ++ []
-      else back x y ++ []
+      if (model.turn) then
+        let movePoses = forward x y ++ [] in
+        List.filter (\pos -> not (List.member pos myPiecePoses)) movePoses
+      else
+        let movePoses = back x y ++ [] in
+        List.filter (\pos -> not (List.member pos myPiecePoses)) movePoses
     CHICKEN ->
-      if (model.turn) then forward x y ++ back x y ++ left x y ++ right x y ++ diagFL x y ++ diagFR x y ++ []
-      else forward x y ++ back x y ++ left x y ++ right x y ++ diagBL x y ++ diagBR x y ++ []
+      if (model.turn) then
+        let movePoses = forward x y ++ back x y ++ left x y ++ right x y ++ diagFL x y ++ diagFR x y ++ [] in
+        List.filter (\pos -> not (List.member pos myPiecePoses)) movePoses
+      else
+        let movePoses = forward x y ++ back x y ++ left x y ++ right x y ++ diagBL x y ++ diagBR x y ++ [] in
+        List.filter (\pos -> not (List.member pos myPiecePoses)) movePoses
     _ -> []
 
 onDrop : msg -> Attribute msg

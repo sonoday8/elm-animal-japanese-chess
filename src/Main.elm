@@ -51,6 +51,7 @@ update msg model =
             case (List.head dragPieces) of
               Just dragPiece -> getDropFields dragPiece model
               _ -> []
+          _ = Debug.log "drop:" dropFields
         in
           { model
           | drag = Just pos
@@ -74,7 +75,7 @@ update msg model =
       let
         dragPos = model.drag
         dropPos = pos
-        pieces = updatedPieces model.pieces dragPos dropPos
+        pieces = updatedPieces model.turn model.pieces dragPos dropPos
       in
         { model
         | turn=not model.turn
@@ -120,8 +121,16 @@ viewFiels model =
 
 view : Model -> Html Msg
 view model =
+  let
+    strTrun =
+      if model.turn then
+        "my"
+      else
+        "enemy"
+  in
   div [] [
-  div [ style
+  div [] [ text strTrun]
+  , div [ style
     [
      ("display", "flex")
      , ("flex-wrap", "wrap")
