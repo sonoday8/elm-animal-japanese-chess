@@ -93,8 +93,6 @@ getEmptyFields pieces fields =
 getDropFields : Piece -> Model -> List Position
 getDropFields piece model =
   let
-    _ = Debug.log "d:" piece.pos
-    _ = Debug.log "d:" piece.own
     pieces = model.pieces
     {x,y} = piece.pos
     p_type = piece.p_type

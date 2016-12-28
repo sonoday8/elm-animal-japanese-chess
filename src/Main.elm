@@ -51,7 +51,6 @@ update msg model =
             case (List.head dragPieces) of
               Just dragPiece -> getDropFields dragPiece model
               _ -> []
-          _ = Debug.log "drop:" dropFields
         in
           { model
           | drag = Just pos
