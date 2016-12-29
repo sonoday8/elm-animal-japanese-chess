@@ -9,32 +9,43 @@ import Json.Decode as Json
 import Types exposing(..)
 
 --ドロップした際、駒の位置を更新
-updatedPieces : Bool -> List Piece -> Maybe Position -> Position -> List Piece
-updatedPieces turn pieces dragPos dropPos=
-  case dragPos of
-      Just drag ->
+updatedPieces : Position -> Model -> List Piece
+updatedPieces dropPos model =
+  let
+    owner = model.turn
+    pieces = model.pieces
+    maybeDragPos = model.drag
+  in
+  case maybeDragPos of
+      Just dragPos ->
         let
-          owner = if turn then MY else ENEMY
-          reservPos = getEmptyReservePos turn pieces
-          pieces = case (getEmptyReservePos turn pieces) of
-            Just resPos ->
-              List.map (\piece ->
-                             if (piece.pos == dropPos && not (piece.own == owner)) then
-                               {piece | pos=resPos, own=owner}
-                             else
-                               piece
-                             ) pieces
-            Nothing -> pieces
+          -- ドロップ時に駒があれば持ち駒として取得
+          reservePiece : Piece -> Piece
+          reservePiece piece =
+            case (getMaybeEmptyReservePos owner pieces) of
+               Just reservePos ->
+                 if (piece.pos == dropPos && not (piece.own == owner)) then
+                   {piece | pos=reservePos, own=owner}
+                 else
+                   piece
+               Nothing -> piece
+          -- 持ち駒取得処理
+          pieces : List Piece
+          pieces = List.map (\piece -> reservePiece piece) pieces
+          -- 駒をドロップ
+          dropPiece : Piece -> Piece
+          dropPiece piece =
+            if piece.pos == dragPos then
+              {piece | pos=dropPos}
+            else
+              piece
         in
-        List.map (\piece ->
-          if piece.pos == drag then
-            {piece | pos=dropPos}
-          else
-            piece
-          ) pieces
-
+        List.map (\piece -> dropPiece piece ) pieces
       _ -> pieces
 
+ -- ポジションにある駒を取得
+maybeGetPiece : Position -> List Piece -> Maybe Piece
+maybeGetPiece dragPos pieces = List.filter (\piece -> piece.pos == dragPos) pieces |> List.head
 
 yLow = 2
 yHeg = 5
@@ -68,13 +79,13 @@ myReserveFields = Array.initialize (yLow*colLength) (\i ->
     }) |> Array.toList
 
 -- 持ち駒フィールドの空いているポジション取得
-getEmptyReservePos : Bool -> List Piece -> Maybe Position
-getEmptyReservePos myTurn pieces =
+getMaybeEmptyReservePos : Own -> List Piece -> Maybe Position
+getMaybeEmptyReservePos owner pieces =
   let
     isFieldEmpty pos pieces = List.isEmpty (List.filter (\piece -> piece.pos == pos) pieces)
     emptyReservePos reserveFields = List.filter (\pos -> isFieldEmpty pos pieces) reserveFields
   in
-  if(myTurn) then
+  if(owner == MY) then
     (List.head (emptyReservePos myReserveFields))
   else
     (List.head (emptyReservePos enemyReserveFields))
@@ -105,14 +116,13 @@ getDropFields piece model =
     diagFR x y = if (x+1 <= xHeg && y-1 >= yLow) then [{x=(x+1), y=(y-1)}] else []
     diagBL x y = if (x-1 >= xLow && y+1 <= yHeg) then [{x=(x-1), y=(y+1)}] else []
     diagBR x y = if (x+1 <= xHeg && y+1 <= yHeg) then [{x=(x+1), y=(y+1)}] else []
-    owner = if model.turn then MY else ENEMY
   in
-  if (not ( (piece.own == MY && model.turn) || (piece.own == ENEMY && not model.turn) )) then
+  if (not ( piece.own == model.turn ) ) then
     []
   else if isReserve then
     getEmptyFields pieces fields
   else
-    let myPiecePoses = List.map (\piece -> piece.pos) (List.filter (\piece -> piece.own == owner) pieces) in
+    let myPiecePoses = List.map (\piece -> piece.pos) (List.filter (\piece -> piece.own == model.turn) pieces) in
     case p_type of
     LION ->
       let movePoses = forward x y ++ back x y ++ left x y ++ right x y ++ diagFL x y ++ diagFR x y ++ diagBL x y ++ diagBR x y ++ [] in
@@ -124,20 +134,23 @@ getDropFields piece model =
       let movePoses = forward x y ++ back x y ++ left x y ++ right x y ++ [] in
       List.filter (\pos -> not (List.member pos myPiecePoses)) movePoses
     CHICK ->
-      if (model.turn) then
+      if (model.turn == MY) then
         let movePoses = forward x y ++ [] in
         List.filter (\pos -> not (List.member pos myPiecePoses)) movePoses
       else
         let movePoses = back x y ++ [] in
         List.filter (\pos -> not (List.member pos myPiecePoses)) movePoses
     CHICKEN ->
-      if (model.turn) then
+      if (model.turn == MY) then
         let movePoses = forward x y ++ back x y ++ left x y ++ right x y ++ diagFL x y ++ diagFR x y ++ [] in
         List.filter (\pos -> not (List.member pos myPiecePoses)) movePoses
       else
         let movePoses = forward x y ++ back x y ++ left x y ++ right x y ++ diagBL x y ++ diagBR x y ++ [] in
         List.filter (\pos -> not (List.member pos myPiecePoses)) movePoses
     _ -> []
+
+-- ターン交代
+changeTurn owner = if owner == MY then ENEMY else MY
 
 onDrop : msg -> Attribute msg
 onDrop msg =

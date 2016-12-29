@@ -8,6 +8,7 @@ import Json.Decode as Json
 
 import Types exposing(..)
 import Func exposing(..)
+import View exposing(..)
 
 main =
   Html.beginnerProgram
@@ -19,7 +20,7 @@ main =
 model : Model
 model =
     {
-    turn=True
+    turn=MY
     , drag=Nothing
     , isDropFields=[]
     , pieces= [
@@ -34,21 +35,14 @@ model =
     ]
     }
 
-type Msg
-  = DragStart Position
-  | DragEnd
-  | DragEnter Position
-  | Drop Position
-  | NoOp
-
 update : Msg -> Model -> Model
 update msg model =
   case msg of
     DragStart pos ->
         let
-          dragPieces = List.filter (\piece -> piece.pos == pos) model.pieces
+          dropFields : List Position
           dropFields =
-            case (List.head dragPieces) of
+            case (maybeGetPiece pos model.pieces) of
               Just dragPiece -> getDropFields dragPiece model
               _ -> []
         in
@@ -58,10 +52,9 @@ update msg model =
           }
     DragEnd ->
 --        let _ = Debug.log "end:" "" in
---      { model
---      | isKnightDragged = False
---      }
-        model
+      { model
+      | isDropFields = []
+      }
 
     DragEnter pos ->
 --        let _ = Debug.log "enter:" pos in
@@ -72,12 +65,10 @@ update msg model =
 
     Drop pos ->
       let
-        dragPos = model.drag
-        dropPos = pos
-        pieces = updatedPieces model.turn model.pieces dragPos dropPos
+        pieces = updatedPieces pos model
       in
         { model
-        | turn=not model.turn
+        | turn= changeTurn model.turn
         , drag=Nothing
         , isDropFields=[]
         , pieces=pieces
@@ -85,58 +76,21 @@ update msg model =
 
     _ -> model
 
-viewFiels model =
-  List.map (\pos ->
-      let
-        isEmpty = List.isEmpty (List.filter (\piece -> piece.pos == pos) model.pieces)
-        name =
-          case List.head (List.filter (\piece -> piece.pos == pos) model.pieces) of
-          Just animal -> animal.p_type
-          Nothing -> NoAnimal
-        pieceDiv = div [style [("width", "100%"),("height", "100%")]
-           , onDragStart (DragStart pos)
-           , onDragEnd DragEnd
-           , onDragEnter (DragEnter pos)
-           , draggable "true"] []
-
-        node =
-            if isEmpty then
-              [  ]
-            else
-              [ (toString pos) ++ (toString name) |> text, pieceDiv]
-
-        isDorp = List.member pos model.isDropFields
-
-        divAttributes =
-            if isDorp then
-                [ style
-                  [("flex-grow", "1"),("width", "30%"), ("height", "25%")]
-                , onDrop (Drop pos),dragOverPrevent NoOp]
-            else
-                [ style [("flex-grow", "1"),("width", "30%"), ("height", "25%")]]
-      in
-      div divAttributes node
-  ) fields
-
 view : Model -> Html Msg
 view model =
   let
-    strTrun =
-      if model.turn then
-        "my"
-      else
-        "enemy"
+    trun_ = if model.turn == MY then "my" else "enemy"
+    attributes =
+      [
+        style [
+          ("display", "flex"), ("flex-wrap", "wrap")
+          , ("width", "450px"), ("height", "450px")
+        ]
+      ]
   in
   div [] [
-  div [] [ text strTrun]
-  , div [ style
-    [
-     ("display", "flex")
-     , ("flex-wrap", "wrap")
-     , ("width", "450px")
-     , ("height", "450px")
-    ]
-  ] (viewFiels model)
- ]
+    div [] [ text trun_]
+    , div attributes (viewFiels model)
+  ]
 
 
