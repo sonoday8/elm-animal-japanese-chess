@@ -1,7 +1,7 @@
 import Array exposing (..)
 import List exposing (..)
 import Html exposing (..)
-import Html.App as Html
+--import Html.App as Html
 import Html.Attributes exposing (style, draggable)
 import Html.Events exposing (on, onWithOptions, Options)
 import Json.Decode as Json

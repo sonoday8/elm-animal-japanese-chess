@@ -30,8 +30,8 @@ updatedPieces dropPos model =
                    piece
                Nothing -> piece
           -- 持ち駒取得処理
-          pieces : List Piece
-          pieces = List.map (\piece -> reservePiece piece) pieces
+          pieces_ : List Piece
+          pieces_ = List.map (\piece -> reservePiece piece) pieces
           -- 駒をドロップ
           dropPiece : Piece -> Piece
           dropPiece piece =
@@ -40,7 +40,7 @@ updatedPieces dropPos model =
             else
               piece
         in
-        List.map (\piece -> dropPiece piece ) pieces
+        List.map (\piece -> dropPiece piece ) pieces_
       _ -> pieces
 
  -- ポジションにある駒を取得
