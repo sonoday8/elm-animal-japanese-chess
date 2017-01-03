@@ -1,14 +1,12 @@
-import Array exposing (..)
-import List exposing (..)
-import Html exposing (..)
---import Html.App as Html
+import Html exposing (Html, beginnerProgram, div, text)
 import Html.Attributes exposing (style, draggable)
 import Html.Events exposing (on, onWithOptions, Options)
 import Json.Decode as Json
 
-import Types exposing(..)
-import Func exposing(..)
+import Types exposing(Model, Msg(..), Own(..), Type(..), Position, Piece)
+import Func
 import View exposing(..)
+
 
 main =
   Html.beginnerProgram
@@ -42,8 +40,8 @@ update msg model =
         let
           dropFields : List Position
           dropFields =
-            case (maybeGetPiece pos model.pieces) of
-              Just dragPiece -> getDropFields dragPiece model
+            case (Func.maybeGetPiece pos model.pieces) of
+              Just dragPiece -> Func.getDropFields dragPiece model
               _ -> []
         in
           { model
@@ -65,10 +63,10 @@ update msg model =
 
     Drop pos ->
       let
-        pieces = updatedPieces pos model
+        pieces = Func.updatedPieces pos model
       in
         { model
-        | turn= changeTurn model.turn
+        | turn= Func.changeTurn model.turn
         , drag=Nothing
         , isDropFields=[]
         , pieces=pieces

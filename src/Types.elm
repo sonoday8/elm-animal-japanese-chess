@@ -1,4 +1,4 @@
-module Types exposing(..)
+module Types exposing(Model, Msg(..), Own(..), Type(..), Position, Piece)
 
 type Type = LION | ELEP | GIRA | CHICK | CHICKEN | NoAnimal
 type Own = MY | ENEMY
