@@ -22,7 +22,11 @@ viewFiels model =
 getAttributes : Position -> Model -> List (Attribute Msg)
 getAttributes pos model =
   let
-    isDrop = List.member pos model.isDropFields
+    isDrop =
+      if (isReservePos pos) then
+        False
+      else
+        List.member pos model.isDropFields
     style_ : Attribute Msg
     style_ = style [("flex-grow", "1"),("width", "30%"), ("height", "25%")]
     dropStyle_ = style [("flex-grow", "1"),("width", "30%"), ("height", "25%"), ("background-color", "pink")]
@@ -55,7 +59,7 @@ getNode pos pieces =
 pieceDiv : Piece -> Html Msg
 pieceDiv piece =
   let
-    color = if piece.own == MY then "azure" else "antiquewhite"
+    color = if piece.own == MY then "rgba(240,255,255,0.5)" else "rgba(250,235,215,0.5)"
     strPos = toString piece.pos
 
   in

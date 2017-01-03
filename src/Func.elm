@@ -99,6 +99,8 @@ getEmptyFields pieces fields =
   in
   List.filter (\pos -> isEmpty pos pieces) fields
 
+isReservePos : Position -> Bool
+isReservePos pos = (pos.y < 2 || pos.y > 5 )
 
 -- ドロップできる位置リストを取得
 getDropFields : Piece -> Model -> List Position
@@ -107,7 +109,7 @@ getDropFields piece model =
     pieces = model.pieces
     {x,y} = piece.pos
     p_type = piece.p_type
-    isReserve = (y < 2 || y > 5 )
+    --isReserve = (y < 2 || y > 5 )
     forward x y = if (y-1 >= yLow) then [{x=x, y=(y-1)}] else []
     back x y = if (y+1 <= yHeg) then [{x=x, y=(y+1)}] else []
     left x y = if (x-1 >= xLow) then [{x=(x-1), y=y}] else []
@@ -119,7 +121,7 @@ getDropFields piece model =
   in
   if (not ( piece.own == model.turn ) ) then
     []
-  else if isReserve then
+  else if isReservePos piece.pos then
     getEmptyFields pieces fields
   else
     let myPiecePoses = List.map (\piece -> piece.pos) (List.filter (\piece -> piece.own == model.turn) pieces) in
