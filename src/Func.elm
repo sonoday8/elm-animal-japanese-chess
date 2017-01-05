@@ -99,8 +99,15 @@ getEmptyFields pieces fields =
   in
   List.filter (\pos -> isEmpty pos pieces) fields
 
+-- そのポジションは持ち駒フィールドかどうか
 isReservePos : Position -> Bool
 isReservePos pos = (pos.y < 2 || pos.y > 5 )
+
+-- そのポジションは敵陣地かどうか
+isEnemyFieldPos : Position -> Own -> Bool
+isEnemyFieldPos pos owner =
+  if owner == MY then (2 <= pos.y && pos.y <= 3)
+  else (4 <= pos.y && pos.y <= 5)
 
 -- ドロップできる位置リストを取得
 getDropFields : Piece -> Model -> List Position
@@ -152,6 +159,7 @@ getDropFields piece model =
     _ -> []
 
 -- ターン交代
+changeTurn : Own -> Own
 changeTurn owner = if owner == MY then ENEMY else MY
 
 onDrop : msg -> Attribute msg

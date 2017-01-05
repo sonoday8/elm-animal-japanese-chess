@@ -1,9 +1,10 @@
 module View exposing(..)
 
 import Html exposing (..)
---import Html.App as Html
-import Html.Attributes exposing (style, draggable)
-import Html.Events exposing (on, onWithOptions, Options)
+import Html.Attributes exposing (style, draggable, href, rel, class)
+import Html.Events exposing (on, onClick, onWithOptions, Options)
+
+import Dialog
 
 import Types exposing(..)
 import Func exposing(..)
@@ -69,3 +70,34 @@ pieceDiv piece =
     , onDragEnd DragEnd
     , onDragEnter (DragEnter piece.pos)
     , draggable "true"] [ strPos ++ toString piece.p_type |> text]
+
+bootstrap : Html msg
+bootstrap =
+    node "link"
+        [ href "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+        , rel "stylesheet"
+        ]
+        []
+
+
+dialogConfig : Model -> Position -> Dialog.Config Msg
+dialogConfig model pos =
+    { closeMessage = Just NoPromote
+    , containerClass = Nothing
+    , header = Just (h3 [] [ text "" ])
+    , body = Just (text ("成る？"))
+    , footer =
+        Just
+            (div [] [
+              button
+                [ class "btn btn-success"
+                , onClick (Promoted pos)
+                ]
+                [ text "YES" ]
+              ,button
+                [ class "btn btn-default"
+                , onClick NoPromote
+                ]
+                [ text "NO" ]
+            ])
+    }

@@ -11,6 +11,7 @@ type alias Model = {
   , drag: Maybe Position
   , isDropFields: List Position
   , pieces:List Piece
+  , promotePos: Maybe Position
   }
 
 type Msg
@@ -18,6 +19,8 @@ type Msg
   | DragEnd
   | DragEnter Position
   | Drop Position
+  | NoPromote
+  | Promoted Position
   | NoOp
 
 

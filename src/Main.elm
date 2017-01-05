@@ -3,6 +3,7 @@ import Html.Attributes exposing (style, draggable)
 import Html.Events exposing (on, onWithOptions, Options)
 import Json.Decode as Json
 
+import Dialog
 import Types exposing(Model, Msg(..), Own(..), Type(..), Position, Piece)
 import Func
 import View exposing(..)
@@ -30,7 +31,8 @@ model =
         ,{own=MY,p_type=GIRA,pos={x=2,y=5}}
         ,{own=MY,p_type=LION,pos={x=1,y=5}}
         ,{own=MY,p_type=ELEP,pos={x=0,y=5}}
-    ]
+      ]
+    , promotePos = Nothing
     }
 
 update : Msg -> Model -> Model
@@ -64,13 +66,26 @@ update msg model =
     Drop pos ->
       let
         pieces = Func.updatedPieces pos model
+        promotePos =
+          case Func.maybeGetPiece pos pieces of
+            Just piece -> if Func.isEnemyFieldPos pos piece.own then Just pos else Nothing
+            Nothing -> Nothing
       in
         { model
         | turn= Func.changeTurn model.turn
         , drag=Nothing
         , isDropFields=[]
         , pieces=pieces
+        , promotePos=promotePos
         }
+
+    Promoted pos ->
+      {model
+      | promotePos=Nothing}
+
+    NoPromote ->
+      {model
+      | promotePos=Nothing}
 
     _ -> model
 
@@ -87,8 +102,14 @@ view model =
       ]
   in
   div [] [
-    div [] [ text trun_]
-    , div attributes (viewFiels model)
+    View.bootstrap
+    , div [] [ text trun_]
+    , div attributes (View.viewFiels model)
+    , Dialog.view
+                (case model.promotePos of
+                    Just pos -> Just (dialogConfig model pos)
+                    Nothing -> Nothing
+                )
   ]
 
 
