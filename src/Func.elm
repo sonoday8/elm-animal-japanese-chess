@@ -162,6 +162,12 @@ getDropFields piece model =
 changeTurn : Own -> Own
 changeTurn owner = if owner == MY then ENEMY else MY
 
+isJust : Maybe a -> Bool
+isJust a =
+  case a of
+    Just a -> True
+    Nothing -> False
+
 onDrop : msg -> Attribute msg
 onDrop msg =
   on "drop" (Json.succeed msg)

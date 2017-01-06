@@ -3,7 +3,7 @@ import Html.Attributes exposing (style, draggable)
 import Html.Events exposing (on, onWithOptions, Options)
 import Json.Decode as Json
 
-import Dialog
+import Dialog exposing(..)
 import Types exposing(Model, Msg(..), Own(..), Type(..), Position, Piece)
 import Func
 import View exposing(..)
@@ -92,7 +92,7 @@ update msg model =
 view : Model -> Html Msg
 view model =
   let
-    trun_ = if model.turn == MY then "my" else "enemy"
+    turn_ = if model.turn == MY then "my" else "enemy"
     attributes =
       [
         style [
@@ -100,16 +100,12 @@ view model =
           , ("width", "450px"), ("height", "450px")
         ]
       ]
+    dialog flg = Dialog.view [BGAlpha 0.6] flg
   in
   div [] [
-    View.bootstrap
-    , div [] [ text trun_]
-    , div attributes (View.viewFiels model)
-    , Dialog.view
-                (case model.promotePos of
-                    Just pos -> Just (dialogConfig model pos)
-                    Nothing -> Nothing
-                )
+    div [] [ text turn_]
+    , div attributes (View.viewFields model)
+    , dialog (Func.isJust model.promotePos)
   ]
 
 

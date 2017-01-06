@@ -4,14 +4,14 @@ import Html exposing (..)
 import Html.Attributes exposing (style, draggable, href, rel, class)
 import Html.Events exposing (on, onClick, onWithOptions, Options)
 
-import Dialog
+--import Dialog
 
-import Types exposing(..)
+import Types exposing(Model, Msg(..), Own(..), Type(..), Position, Piece)
 import Func exposing(..)
 
 -- フィールドを描画
-viewFiels : Model -> List (Html Msg)
-viewFiels model =
+viewFields : Model -> List (Html Msg)
+viewFields model =
   List.map (\pos ->
       let
         node = getNode pos model.pieces
@@ -71,33 +71,34 @@ pieceDiv piece =
     , onDragEnter (DragEnter piece.pos)
     , draggable "true"] [ strPos ++ toString piece.p_type |> text]
 
-bootstrap : Html msg
-bootstrap =
-    node "link"
-        [ href "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
-        , rel "stylesheet"
-        ]
-        []
 
-
-dialogConfig : Model -> Position -> Dialog.Config Msg
-dialogConfig model pos =
-    { closeMessage = Just NoPromote
-    , containerClass = Nothing
-    , header = Just (h3 [] [ text "" ])
-    , body = Just (text ("成る？"))
-    , footer =
-        Just
-            (div [] [
-              button
-                [ class "btn btn-success"
-                , onClick (Promoted pos)
-                ]
-                [ text "YES" ]
-              ,button
-                [ class "btn btn-default"
-                , onClick NoPromote
-                ]
-                [ text "NO" ]
-            ])
-    }
+--bootstrap : Html msg
+--bootstrap =
+--    node "link"
+--        [ href "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+--        , rel "stylesheet"
+--        ]
+--        []
+--
+--
+--dialogConfig : Model -> Position -> Dialog.Config Msg
+--dialogConfig model pos =
+--    { closeMessage = Just NoPromote
+--    , containerClass = Nothing
+--    , header = Just (h3 [] [ text "" ])
+--    , body = Just (text ("成る？"))
+--    , footer =
+--        Just
+--            (div [] [
+--              button
+--                [ class "btn btn-success"
+--                , onClick (Promoted pos)
+--                ]
+--                [ text "YES" ]
+--              ,button
+--                [ class "btn btn-default"
+--                , onClick NoPromote
+--                ]
+--                [ text "NO" ]
+--            ])
+--    }
