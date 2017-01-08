@@ -6,32 +6,26 @@ import Html.Events exposing (on, onClick, onWithOptions, Options)
 
 import Types exposing(Model, Msg(..), Own(..), Type(..), Position, Piece)
 
-type alias FooterModel =
-  {
-    text: String
-  }
-
-type Row =
+type Config =
   BGAlpha Float
-  | HeaderStr String
-  | Body String
-  | Footer FooterModel
+  | DialogHeader (List (Html Msg))
+  | DialogBody (List (Html Msg))
+  | DialogFooter (List (Html Msg))
 
-maybeBGAlpha config =
-  List.head (List.filter (
-     \conf -> case conf of
-       BGAlpha alpha -> True
-       _ -> False) config)
-
-dialogStyle : List Row -> List (String, String)
+dialogStyle : List Config -> List (String, String)
 dialogStyle config =
   let
+    maybeValue_ config =
+      List.filter (
+         \conf -> case conf of
+           BGAlpha a -> True
+           _ -> False) config |> List.head
     alpha =
-      case maybeBGAlpha config of
+      case maybeValue_ config of
         Just a -> case a of
           BGAlpha alpha -> alpha
-          _ -> 0
-        Nothing -> 0
+          _ -> 0.6
+        Nothing -> 0.6
   in
   [
     ("background-color", "rgba(0,0,0,"++ toString alpha ++")")
@@ -81,24 +75,69 @@ dialogCloseButtonStyle =
     , ("outline", "none")
   ]
 
-dialogDiv : List Row -> Html Msg
-dialogDiv config =
+headerBody : List Config -> List (Html Msg)
+headerBody config =
+  let
+    maybeValue_ config =
+      List.filter (
+         \conf -> case conf of
+           DialogHeader a -> True
+           _ -> False) config |> List.head
+  in
+  case maybeValue_ config of
+    Just a -> case a of
+      DialogHeader a_ -> a_
+      _ -> []
+    Nothing -> []
+
+bodyBody : List Config -> List (Html Msg)
+bodyBody config =
+  let
+    maybeValue_ config =
+      List.filter (
+         \conf -> case conf of
+           DialogBody a -> True
+           _ -> False) config |> List.head
+  in
+  case maybeValue_ config of
+    Just a -> case a of
+      DialogBody a_ -> a_
+      _ -> []
+    Nothing -> []
+
+footerBody : List Config -> List (Html Msg)
+footerBody config =
+  let
+    maybeValue_ config =
+      List.filter (
+         \conf -> case conf of
+           DialogFooter a -> True
+           _ -> False) config |> List.head
+  in
+  case maybeValue_ config of
+    Just a -> case a of
+      DialogFooter a_ -> a_
+      _ -> []
+    Nothing -> []
+
+dialogDiv : List Config -> Msg -> Html Msg
+dialogDiv config closeMsg =
   div [ class "dialog", style <| dialogStyle config]
     [
       div [ class "dialog-board", style dialogBoardStyle] [
         div [ class "dialog-header", style dialogHeaderStyle] [
-          div [] [text ""]
+          div [] (headerBody config)
           , div [ style [("width", "10px")]] []
-          , button [ style dialogCloseButtonStyle, (onClick NoPromote)
+          , button [ style dialogCloseButtonStyle, (onClick closeMsg )
         ] [ text "x" ] ]
-        , div [] [ text "a"]
-        , div [] [ text "b"]
+        , div [] (bodyBody config)
+        , div [] (footerBody config)
       ]
     ]
 
-view : List Row -> Bool -> Html Msg
-view config isDialog =
+view : List Config -> Msg -> Bool -> Html Msg
+view config closeMsg isDialog =
   if isDialog then
-    dialogDiv config
+    dialogDiv config closeMsg
   else
     div [] []

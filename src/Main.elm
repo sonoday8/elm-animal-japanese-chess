@@ -1,6 +1,6 @@
-import Html exposing (Html, beginnerProgram, div, text)
+import Html exposing (Html, beginnerProgram, div, text, button)
 import Html.Attributes exposing (style, draggable)
-import Html.Events exposing (on, onWithOptions, Options)
+import Html.Events exposing (on, onClick, onWithOptions, Options)
 import Json.Decode as Json
 
 import Dialog exposing(..)
@@ -80,18 +80,27 @@ update msg model =
         }
 
     Promoted pos ->
+      let _ = Debug.log "Promoted:" pos in
+      let
+        pieces = Func.promotePiece pos model.pieces
+      in
       {model
-      | promotePos=Nothing}
-
-    NoPromote ->
-      {model
-      | promotePos=Nothing}
+        | pieces = pieces
+        , promotePos=Nothing}
 
     _ -> model
 
 view : Model -> Html Msg
 view model =
   let
+    dialogConfig = [
+      DialogBody [text "成る？"]
+      , DialogFooter [
+          button [style [], (onClick (Promoted Nothing) )] [ text "NO" ]
+          , button [style [], (onClick (Promoted model.promotePos))] [ text "YES" ]
+        ]
+      ]
+    _ = Debug.log "view:" (Dialog.headerBody dialogConfig)
     turn_ = if model.turn == MY then "my" else "enemy"
     attributes =
       [
@@ -100,7 +109,7 @@ view model =
           , ("width", "450px"), ("height", "450px")
         ]
       ]
-    dialog flg = Dialog.view [BGAlpha 0.6] flg
+    dialog flg = Dialog.view dialogConfig (Promoted Nothing) flg
   in
   div [] [
     div [] [ text turn_]

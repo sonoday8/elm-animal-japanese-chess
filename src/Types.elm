@@ -19,8 +19,7 @@ type Msg
   | DragEnd
   | DragEnter Position
   | Drop Position
-  | NoPromote
-  | Promoted Position
+  | Promoted (Maybe Position)
   | NoOp
 
 

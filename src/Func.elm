@@ -45,7 +45,7 @@ updatedPieces dropPos model =
 
  -- ポジションにある駒を取得
 maybeGetPiece : Position -> List Piece -> Maybe Piece
-maybeGetPiece dragPos pieces = List.filter (\piece -> piece.pos == dragPos) pieces |> List.head
+maybeGetPiece pos pieces = List.filter (\piece -> piece.pos == pos) pieces |> List.head
 
 yLow = 2
 yHeg = 5
@@ -162,11 +162,27 @@ getDropFields piece model =
 changeTurn : Own -> Own
 changeTurn owner = if owner == MY then ENEMY else MY
 
+-- Justかどうか
 isJust : Maybe a -> Bool
 isJust a =
   case a of
     Just a -> True
     Nothing -> False
+
+--駒なり処理
+promotePiece : Maybe Position -> List Piece -> List Piece
+promotePiece maybePos pieces =
+  let
+    updateCHICKEN piece =
+      case maybePos of
+        Just pos ->
+          if (piece.pos == pos) then
+            {piece | p_type=CHICKEN}
+          else
+            piece
+        Nothing -> piece
+  in
+  List.map (\piece -> updateCHICKEN piece ) pieces
 
 onDrop : msg -> Attribute msg
 onDrop msg =
