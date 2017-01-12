@@ -1,7 +1,7 @@
 module View exposing(..)
 
 import Html exposing (..)
-import Html.Attributes exposing (style, draggable, href, rel, class)
+import Html.Attributes exposing (style, draggable, href, rel, class, src)
 import Html.Events exposing (on, onClick, onWithOptions, Options)
 
 --import Dialog
@@ -69,8 +69,17 @@ pieceDiv piece =
     , onDragStart (DragStart piece.pos)
     , onDragEnd DragEnd
     , onDragEnter (DragEnter piece.pos)
-    , draggable "true"] [ strPos ++ toString piece.p_type |> text]
+    , draggable "true"
+    ]
+    (pieceImg piece)
+    --[ strPos ++ toString piece.p_type |> text]
+    --[ img [ src "lion.png", style [ ("height", "115px") ] ] [] ]
 
+pieceImg : Piece -> List (Html Msg)
+pieceImg piece =
+  case piece.p_type of
+    LION -> [ img [ src "lion.png", style [ ("height", "115px") ] ] [] ]
+    _ -> [ toString piece.pos ++ toString piece.p_type |> text]
 
 --bootstrap : Html msg
 --bootstrap =
