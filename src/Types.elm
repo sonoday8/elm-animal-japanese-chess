@@ -12,6 +12,7 @@ type alias Model = {
   , isDropFields: List Position
   , pieces:List Piece
   , promotePos: Maybe Position
+  , win: Maybe Own
   }
 
 type Msg

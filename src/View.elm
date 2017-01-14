@@ -57,6 +57,18 @@ getNode pos pieces =
       [ pieceDiv piece]
     _ -> []
 
+pieceDivStyle = [
+      ("display","-ms-flexbox")
+      ,("display","-webkit-box")
+      ,("display","flex")
+      ,("-webkit-flex-direction","column")
+      ,("flex-direction","column")
+      ,("-webkit-justify-content","center")
+      ,("justify-content","center")
+      ,("-webkit-align-items","center")
+      ,("align-items","center")
+  ]
+
 pieceDiv : Piece -> Html Msg
 pieceDiv piece =
   let
@@ -65,7 +77,7 @@ pieceDiv piece =
 
   in
   div [
-    style [("width", "100%"),("height", "100%"), ("background-color", color), ("border", "#ff0000 solid 1px")]
+    style (pieceDivStyle ++ [("width", "100%"),("height", "100%"), ("background-color", color), ("border", "#ff0000 solid 1px")])
     , onDragStart (DragStart piece.pos)
     , onDragEnd DragEnd
     , onDragEnter (DragEnter piece.pos)
@@ -75,10 +87,21 @@ pieceDiv piece =
     --[ strPos ++ toString piece.p_type |> text]
     --[ img [ src "lion.png", style [ ("height", "115px") ] ] [] ]
 
+pieceImgStyle = [
+    ("width","auto")
+    ,("height","auto")
+    ,("max-width","100%")
+    ,("max-height","100%")
+  ]
+
 pieceImg : Piece -> List (Html Msg)
 pieceImg piece =
   case piece.p_type of
-    LION -> [ img [ src "lion.png", style [ ("height", "115px") ] ] [] ]
+    LION -> [ img [ src "lion.png", style pieceImgStyle ] [] ]
+    GIRA -> [ img [ src "gira.png", style pieceImgStyle ] [] ]
+    ELEP -> [ img [ src "elep.png", style pieceImgStyle ] [] ]
+    CHICKEN -> [ img [ src "chicken.png", style pieceImgStyle ] [] ]
+    CHICK -> [ img [ src "chick.png", style pieceImgStyle ] [] ]
     _ -> [ toString piece.pos ++ toString piece.p_type |> text]
 
 --bootstrap : Html msg

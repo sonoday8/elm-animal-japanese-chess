@@ -33,6 +33,7 @@ model =
         ,{own=MY,p_type=ELEP,pos={x=0,y=5}}
       ]
     , promotePos = Nothing
+    , win = Nothing
     }
 
 update : Msg -> Model -> Model
@@ -66,10 +67,19 @@ update msg model =
     Drop pos ->
       let
         pieces = Func.updatedPieces pos model
+        maybePiece = Func.maybeGetPiece pos pieces
+        win = Nothing
         promotePos =
-          case Func.maybeGetPiece pos pieces of
-            Just piece -> if Func.isEnemyFieldPos pos piece.own then Just pos else Nothing
-            Nothing -> Nothing
+          case win of
+            Just own -> Nothing
+            Nothing ->
+              case maybePiece of
+                Just piece ->
+                  if Func.isEnemyFieldPos pos piece.own && piece.p_type == CHICK then
+                    Just pos
+                  else
+                    Nothing
+                Nothing -> Nothing
       in
         { model
         | turn= Func.changeTurn model.turn
@@ -80,9 +90,8 @@ update msg model =
         }
 
     Promoted pos ->
-      let _ = Debug.log "Promoted:" pos in
       let
-        pieces = Func.promotePiece pos model.pieces
+        pieces = Func.promotePieces pos model.pieces
       in
       {model
         | pieces = pieces
@@ -93,14 +102,18 @@ update msg model =
 view : Model -> Html Msg
 view model =
   let
-    dialogConfig = [
+    promoteDialogConfig = [
       DialogBody [text "成る？"]
       , DialogFooter [
           button [style [], (onClick (Promoted Nothing) )] [ text "NO" ]
           , button [style [], (onClick (Promoted model.promotePos))] [ text "YES" ]
         ]
       ]
-    _ = Debug.log "view:" (Dialog.headerBody dialogConfig)
+    promoteDialog flg = Dialog.view promoteDialogConfig (Promoted Nothing) flg
+
+    --winDialogConfig = [DialogBody [text "勝利！"]]
+    --winDialog flg =
+
     turn_ = if model.turn == MY then "my" else "enemy"
     attributes =
       [
@@ -109,12 +122,11 @@ view model =
           , ("width", "450px"), ("height", "450px")
         ]
       ]
-    dialog flg = Dialog.view dialogConfig (Promoted Nothing) flg
   in
   div [] [
     div [] [ text turn_]
     , div attributes (View.viewFields model)
-    , dialog (Func.isJust model.promotePos)
+    , promoteDialog (Func.isJust model.promotePos)
   ]
 
 

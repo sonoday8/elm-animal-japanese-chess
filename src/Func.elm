@@ -25,7 +25,10 @@ updatedPieces dropPos model =
             case (getMaybeEmptyReservePos owner pieces) of
                Just reservePos ->
                  if (piece.pos == dropPos && not (piece.own == owner)) then
-                   {piece | pos=reservePos, own=owner}
+                   if piece.p_type == CHICKEN then
+                     {piece | p_type=CHICK, pos=reservePos, own=owner}
+                   else
+                     {piece | pos=reservePos, own=owner}
                  else
                    piece
                Nothing -> piece
@@ -170,17 +173,20 @@ isJust a =
     Nothing -> False
 
 --駒なり処理
-promotePiece : Maybe Position -> List Piece -> List Piece
-promotePiece maybePos pieces =
+promotePieces : Maybe Position -> List Piece -> List Piece
+promotePieces maybePos pieces =
   let
     updateCHICKEN piece =
-      case maybePos of
-        Just pos ->
-          if (piece.pos == pos) then
-            {piece | p_type=CHICKEN}
-          else
-            piece
-        Nothing -> piece
+      if piece.p_type == CHICK then
+        case maybePos of
+          Just pos ->
+            if (piece.pos == pos) then
+              {piece | p_type=CHICKEN}
+            else
+              piece
+          Nothing -> piece
+      else
+        piece
   in
   List.map (\piece -> updateCHICKEN piece ) pieces
 
