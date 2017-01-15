@@ -1,7 +1,7 @@
 {
     "version": "1.0.0",
     "summary": "animal japanese chess",
-    "repository": "https://github.com/elm-lang/elm-architecture-tutorial.git",
+    "repository": "https://github.com/sonoday8/elm-animal-japanese-chess.git",
     "license": "MIT",
     "source-directories": [
         "src"
