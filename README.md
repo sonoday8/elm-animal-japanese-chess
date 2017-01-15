@@ -17,3 +17,4 @@
 
 * テストを書くつもり。[→](https://github.com/elm-community/elm-test)
 * CIなど導入するか？
+* enemyをAIで？
