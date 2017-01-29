@@ -80,6 +80,7 @@ update msg model =
                   else
                     Nothing
                 Nothing -> Nothing
+        _ = Func.enemyLogic pieces
       in
         { model
         | turn= Func.changeTurn model.turn

@@ -117,9 +117,25 @@ getDropFields : Piece -> Model -> List Position
 getDropFields piece model =
   let
     pieces = model.pieces
-    {x,y} = piece.pos
-    p_type = piece.p_type
-    --isReserve = (y < 2 || y > 5 )
+  in
+  if (not ( piece.own == model.turn ) ) then
+    []
+  else if isReservePos piece.pos then
+    getEmptyFields pieces fields
+  else
+    let
+      myPiecePoses = List.map (\piece -> piece.pos) (List.filter (\piece -> piece.own == model.turn) pieces)
+      movePoses_ = movePoses model.turn piece
+    in
+    List.filter (\pos -> not (List.member pos myPiecePoses)) movePoses_
+
+{-|
+
+-}
+movePoses : Own -> Piece -> List Position
+movePoses turn piece =
+  let
+    {x, y} = piece.pos
     forward x y = if (y-1 >= yLow) then [{x=x, y=(y-1)}] else []
     back x y = if (y+1 <= yHeg) then [{x=x, y=(y+1)}] else []
     left x y = if (x-1 >= xLow) then [{x=(x-1), y=y}] else []
@@ -129,36 +145,23 @@ getDropFields piece model =
     diagBL x y = if (x-1 >= xLow && y+1 <= yHeg) then [{x=(x-1), y=(y+1)}] else []
     diagBR x y = if (x+1 <= xHeg && y+1 <= yHeg) then [{x=(x+1), y=(y+1)}] else []
   in
-  if (not ( piece.own == model.turn ) ) then
-    []
-  else if isReservePos piece.pos then
-    getEmptyFields pieces fields
-  else
-    let myPiecePoses = List.map (\piece -> piece.pos) (List.filter (\piece -> piece.own == model.turn) pieces) in
-    case p_type of
+  case piece.p_type of
     LION ->
-      let movePoses = forward x y ++ back x y ++ left x y ++ right x y ++ diagFL x y ++ diagFR x y ++ diagBL x y ++ diagBR x y ++ [] in
-      List.filter (\pos -> not (List.member pos myPiecePoses)) movePoses
+      forward x y ++ back x y ++ left x y ++ right x y ++ diagFL x y ++ diagFR x y ++ diagBL x y ++ diagBR x y ++ []
     ELEP ->
-      let movePoses = diagFL x y ++ diagFR x y ++ diagBL x y ++ diagBR x y ++ [] in
-      List.filter (\pos -> not (List.member pos myPiecePoses)) movePoses
+      diagFL x y ++ diagFR x y ++ diagBL x y ++ diagBR x y ++ []
     GIRA ->
-      let movePoses = forward x y ++ back x y ++ left x y ++ right x y ++ [] in
-      List.filter (\pos -> not (List.member pos myPiecePoses)) movePoses
+      forward x y ++ back x y ++ left x y ++ right x y ++ []
     CHICK ->
-      if (model.turn == MY) then
-        let movePoses = forward x y ++ [] in
-        List.filter (\pos -> not (List.member pos myPiecePoses)) movePoses
+      if (turn == MY) then
+        forward x y ++ []
       else
-        let movePoses = back x y ++ [] in
-        List.filter (\pos -> not (List.member pos myPiecePoses)) movePoses
+        back x y ++ []
     CHICKEN ->
-      if (model.turn == MY) then
-        let movePoses = forward x y ++ back x y ++ left x y ++ right x y ++ diagFL x y ++ diagFR x y ++ [] in
-        List.filter (\pos -> not (List.member pos myPiecePoses)) movePoses
+      if (turn == MY) then
+        forward x y ++ back x y ++ left x y ++ right x y ++ diagFL x y ++ diagFR x y ++ []
       else
-        let movePoses = forward x y ++ back x y ++ left x y ++ right x y ++ diagBL x y ++ diagBR x y ++ [] in
-        List.filter (\pos -> not (List.member pos myPiecePoses)) movePoses
+        forward x y ++ back x y ++ left x y ++ right x y ++ diagBL x y ++ diagBR x y ++ []
     _ -> []
 
 -- ターン交代
@@ -209,3 +212,38 @@ onDragEnter msg =
 dragOverPrevent : msg -> Attribute msg
 dragOverPrevent msg =
   onWithOptions "dragover" {stopPropagation = False, preventDefault = True} (Json.succeed msg)
+
+
+enemyLogic pieces =
+  let
+    myPieces = List.filter (\piece -> piece.own == MY) pieces
+    myCanMvPlaces = List.map (\piece -> movePoses MY piece) myPieces |> List.concat
+    enemyPieces = List.filter (\piece -> piece.own == ENEMY) pieces
+    enemyCanMvPlaces = List.map (\piece -> movePoses ENEMY piece) enemyPieces |> List.concat
+
+    --そのポジションに移動できる相手駒
+    myCanMvPieces pos = List.filter (\piece ->
+        List.member pos (movePoses MY piece)
+      ) myPieces
+    --そのポジションに移動できる駒
+    enemyCanMvPieces pos = List.filter (\piece ->
+                                   List.member pos (movePoses ENEMY piece)
+                                 ) enemyPieces
+
+    --動かさなければ、取られてしまう駒
+    ensures = List.filter (\enemyPiece -> List.member enemyPiece.pos myCanMvPlaces) enemyPieces
+    _ = List.map (\piece ->
+      let
+        _ = List.map (\piece ->
+          List.map (\piece ->
+            let
+              _ = Debug.log "enemyLogic:" piece
+            in
+            piece
+            ) (enemyCanMvPieces piece.pos) --動かす自分の駒決定（複数）
+          ) (myCanMvPieces piece.pos) --相手駒決定
+      in
+      piece
+      ) ensures
+  in
+  pieces
