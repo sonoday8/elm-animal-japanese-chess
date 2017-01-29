@@ -232,18 +232,9 @@ enemyLogic pieces =
 
     --動かさなければ、取られてしまう駒
     ensures = List.filter (\enemyPiece -> List.member enemyPiece.pos myCanMvPlaces) enemyPieces
-    _ = List.map (\piece ->
-      let
-        _ = List.map (\piece ->
-          List.map (\piece ->
-            let
-              _ = Debug.log "enemyLogic:" piece
-            in
-            piece
-            ) (enemyCanMvPieces piece.pos) --動かす自分の駒決定（複数）
-          ) (myCanMvPieces piece.pos) --相手駒決定
-      in
-      piece
-      ) ensures
+    myEnsures = List.map (\piece -> myCanMvPieces piece.pos) ensures |> List.concat
+    enemyEnsures = List.map (\piece -> enemyCanMvPieces piece.pos) myEnsures |> List.concat
+
+    _ = List.map (\piece -> let _ = Debug.log "enemyLogic:" piece in piece) enemyEnsures
   in
   pieces
