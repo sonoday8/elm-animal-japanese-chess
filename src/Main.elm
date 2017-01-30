@@ -80,10 +80,9 @@ update msg model =
                   else
                     Nothing
                 Nothing -> Nothing
-        _ = Func.enemyLogic pieces
       in
         { model
-        | turn= Func.changeTurn model.turn
+        | turn= if Func.isJust promotePos then model.turn else Func.changeTurn model.turn
         , drag=Nothing
         , isDropFields=[]
         , pieces=pieces
@@ -95,7 +94,8 @@ update msg model =
         pieces = Func.promotePieces pos model.pieces
       in
       {model
-        | pieces = pieces
+        | turn= Func.changeTurn model.turn
+        , pieces = pieces
         , promotePos=Nothing}
 
     _ -> model
@@ -123,6 +123,7 @@ view model =
           , ("width", "450px"), ("height", "450px")
         ]
       ]
+    _ = if model.turn == ENEMY then Func.enemyLogic model.pieces else model.pieces
   in
   div [] [
     div [] [ text turn_]
