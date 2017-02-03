@@ -21,6 +21,7 @@ type Msg
   | DragEnter Position
   | Drop Position
   | Promoted (Maybe Position)
+  | Reset
   | NoOp
 
 

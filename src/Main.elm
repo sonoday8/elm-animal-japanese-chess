@@ -16,8 +16,8 @@ main =
     , update = update
     }
 
-model : Model
-model =
+initModel : Model
+initModel =
     {
     turn=MY
     , drag=Nothing
@@ -35,6 +35,9 @@ model =
     , promotePos = Nothing
     , win = Nothing
     }
+
+model : Model
+model = initModel
 
 update : Msg -> Model -> Model
 update msg model =
@@ -67,26 +70,19 @@ update msg model =
     Drop pos ->
       let
         pieces = Func.updatedPieces pos model
-        maybePiece = Func.maybeGetPiece pos pieces
-        win = Nothing
+        win = Func.isWin pieces
         promotePos =
           case win of
             Just own -> Nothing
-            Nothing ->
-              case maybePiece of
-                Just piece ->
-                  if Func.isEnemyFieldPos pos piece.own && piece.p_type == CHICK then
-                    Just pos
-                  else
-                    Nothing
-                Nothing -> Nothing
-      in
+            Nothing -> Func.getPromotePos pos pieces
+       in
         { model
         | turn= if Func.isJust promotePos then model.turn else Func.changeTurn model.turn
         , drag=Nothing
         , isDropFields=[]
         , pieces=pieces
         , promotePos=promotePos
+        , win=win
         }
 
     Promoted pos ->
@@ -97,6 +93,8 @@ update msg model =
         | turn= Func.changeTurn model.turn
         , pieces = pieces
         , promotePos=Nothing}
+
+    Reset -> initModel
 
     _ -> model
 
@@ -112,8 +110,12 @@ view model =
       ]
     promoteDialog flg = Dialog.view promoteDialogConfig (Promoted Nothing) flg
 
-    --winDialogConfig = [DialogBody [text "勝利！"]]
-    --winDialog flg =
+    winStr = case model.win of
+      Just MY -> "勝ち！"
+      Just ENEMY -> "負け。。"
+      Nothing -> ""
+    winDialogConfig = [DialogBody [text winStr]]
+    winDialog flg = Dialog.view winDialogConfig Reset flg
 
     turn_ = if model.turn == MY then "my" else "enemy"
     attributes =
@@ -129,6 +131,7 @@ view model =
     div [] [ text turn_]
     , div attributes (View.viewFields model)
     , promoteDialog (Func.isJust model.promotePos)
+    , winDialog (Func.isJust model.win)
   ]
 
 

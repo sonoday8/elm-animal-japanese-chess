@@ -175,6 +175,17 @@ isJust a =
     Just a -> True
     Nothing -> False
 
+--駒成りできるか？
+getPromotePos : Position -> List Piece -> Maybe Position
+getPromotePos pos pieces =
+  case (maybeGetPiece pos pieces) of
+    Just piece ->
+      if isEnemyFieldPos pos piece.own && piece.p_type == CHICK then
+        Just pos
+      else
+        Nothing
+    Nothing -> Nothing
+
 --駒なり処理
 promotePieces : Maybe Position -> List Piece -> List Piece
 promotePieces maybePos pieces =
@@ -192,6 +203,16 @@ promotePieces maybePos pieces =
         piece
   in
   List.map (\piece -> updateCHICKEN piece ) pieces
+
+-- 勝敗判定
+isWin : List Piece -> Maybe Own
+isWin pieces =
+  let
+    isLionReservePos piece =  (isReservePos piece.pos && piece.p_type == LION)
+  in
+  case List.filter (\piece -> isLionReservePos piece) pieces |> List.head of
+    Nothing -> Nothing
+    Just piece -> Just piece.own
 
 onDrop : msg -> Attribute msg
 onDrop msg =
