@@ -8,6 +8,16 @@ import Json.Decode as Json
 
 import Types exposing(..)
 
+pieceSorter : Piece -> Int
+pieceSorter piece =
+  case piece.p_type of
+    LION -> 5
+    ELEP -> 4
+    GIRA -> 3
+    CHICKEN -> 2
+    CHICK -> 1
+
+
 --ドロップした際、駒の位置を更新
 updatedPieces : Position -> Model -> List Piece
 updatedPieces dropPos model =
@@ -162,7 +172,6 @@ movePoses turn piece =
         forward x y ++ back x y ++ left x y ++ right x y ++ diagFL x y ++ diagFR x y ++ []
       else
         forward x y ++ back x y ++ left x y ++ right x y ++ diagBL x y ++ diagBR x y ++ []
-    _ -> []
 
 -- ターン交代
 changeTurn : Own -> Own
@@ -237,9 +246,13 @@ dragOverPrevent msg =
 
 enemyLogic pieces =
   let
+    -- MYの駒一覧
     myPieces = List.filter (\piece -> piece.own == MY) pieces
+    -- MYの駒が動かせる場所一覧
     myCanMvPlaces = List.map (\piece -> movePoses MY piece) myPieces |> List.concat
+    -- ENEMYの駒一覧
     enemyPieces = List.filter (\piece -> piece.own == ENEMY) pieces
+    -- ENEMYの駒が動かせる場所一覧
     enemyCanMvPlaces = List.map (\piece -> movePoses ENEMY piece) enemyPieces |> List.concat
 
     --そのポジションに移動できる相手駒
@@ -251,9 +264,45 @@ enemyLogic pieces =
                                    List.member pos (movePoses ENEMY piece)
                                  ) enemyPieces
 
-    --動かさなければ、取られてしまう駒
-    ensures = List.filter (\enemyPiece -> List.member enemyPiece.pos myCanMvPlaces) enemyPieces
+    -- 動かさなければ、取られてしまうENEMY駒一覧
+    ensures = List.filter (\enemyPiece -> List.member enemyPiece.pos myCanMvPlaces) enemyPieces |> List.sortBy pieceSorter
+    _ = List.map (\piece ->
+      case piece.p_type of
+        LION ->
+          let
+            _ = Debug.log "" "LION!!"
+            myPiece = myCanMvPieces piece.pos |> List.head
+            _ = Debug.log "" myPiece
+          in piece
+        ELEP ->
+          let
+            _ = Debug.log "" "ELEP!!"
+            myPiece = myCanMvPieces piece.pos |> List.head
+            _ = Debug.log "" myPiece
+          in piece
+        GIRA ->
+          let
+            _ = Debug.log "" "GIRA!!"
+            myPiece = myCanMvPieces piece.pos |> List.head
+            _ = Debug.log "" myPiece
+          in piece
+        CHICKEN ->
+          let
+            _ = Debug.log "" "CHICKEN!!"
+            myPiece = myCanMvPieces piece.pos |> List.head
+            _ = Debug.log "" myPiece
+          in piece
+        CHICK ->
+          let
+            _ = Debug.log "" "CHICK!!"
+            myPiece = myCanMvPieces piece.pos |> List.head
+            _ = Debug.log "" myPiece
+          in piece
+
+      ) ensures
+    -- 動かせば、ENEMY駒を取得できるMY駒一覧
     myEnsures = List.map (\piece -> myCanMvPieces piece.pos) ensures |> List.concat
+    -- 動かせば、MY駒を取得できるENEMY駒一覧
     enemyEnsures = List.map (\piece -> enemyCanMvPieces piece.pos) myEnsures |> List.concat
 
     _ = List.map (\piece -> let _ = Debug.log "enemyLogic:" piece in piece) enemyEnsures

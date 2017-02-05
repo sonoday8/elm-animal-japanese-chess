@@ -1,6 +1,6 @@
 module Types exposing(Model, Msg(..), Own(..), Type(..), Position, Piece)
 
-type Type = LION | ELEP | GIRA | CHICK | CHICKEN | NoAnimal
+type Type = LION | ELEP | GIRA | CHICK | CHICKEN
 type Own = MY | ENEMY
 
 type alias Position = {x:Int, y:Int}

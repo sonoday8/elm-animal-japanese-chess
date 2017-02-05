@@ -62,9 +62,6 @@ update msg model =
 
     DragEnter pos ->
 --        let _ = Debug.log "enter:" pos in
---      { model
---      | tileOver = Just pos
---      }
         model
 
     Drop pos ->

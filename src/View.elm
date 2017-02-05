@@ -49,7 +49,7 @@ getNode pos pieces =
     name : String
     name = case maybePiece of
       Just animal -> toString animal.p_type
-      Nothing -> toString NoAnimal
+      Nothing -> ""
 
   in
   case maybePiece of
@@ -102,35 +102,4 @@ pieceImg piece =
     ELEP -> [ img [ src "elep.png", style pieceImgStyle ] [] ]
     CHICKEN -> [ img [ src "chicken.png", style pieceImgStyle ] [] ]
     CHICK -> [ img [ src "chick.png", style pieceImgStyle ] [] ]
-    _ -> [ toString piece.pos ++ toString piece.p_type |> text]
 
---bootstrap : Html msg
---bootstrap =
---    node "link"
---        [ href "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
---        , rel "stylesheet"
---        ]
---        []
---
---
---dialogConfig : Model -> Position -> Dialog.Config Msg
---dialogConfig model pos =
---    { closeMessage = Just NoPromote
---    , containerClass = Nothing
---    , header = Just (h3 [] [ text "" ])
---    , body = Just (text ("成る？"))
---    , footer =
---        Just
---            (div [] [
---              button
---                [ class "btn btn-success"
---                , onClick (Promoted pos)
---                ]
---                [ text "YES" ]
---              ,button
---                [ class "btn btn-default"
---                , onClick NoPromote
---                ]
---                [ text "NO" ]
---            ])
---    }
